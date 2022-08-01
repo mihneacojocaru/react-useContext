@@ -1,34 +1,80 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## React useContext Template
 
-## Getting Started
+Basic instructions to create a Context Provider for your NextJS App
 
-First, run the development server:
+#### Create a context folder in the root directory
 
-```bash
-npm run dev
-# or
-yarn dev
+./context
+
+#### Create a contextProvider file
+
+**contextProvider.js** with the following code:
+
+```js
+import { createContext, useContext, useState } from "react";
+
+const StateContext = createContext();
+
+export const ContextProvider = ({ children }) => {
+  const [currentCounter, setCurrentCounter] = useState(0);
+
+  return (
+    <StateContext.Provider value={{ currentCounter, setCurrentCounter }}>
+      {children}
+    </StateContext.Provider>
+  );
+};
+
+export const useStateContext = () => useContext(StateContext);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Go into \_app.js and wrap the main _Component_ in a _ContextProvider_ component
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```js
+import { ContextProvider } from "../context/contextProvider";
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+function MyApp({ Component, pageProps }) {
+  return (
+    <ContextProvider>
+      <Component {...pageProps} />
+    </ContextProvider>
+  );
+}
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+export default MyApp;
+```
 
-## Learn More
+### Import the useStateContext in your component and destructure the object values you want to use
 
-To learn more about Next.js, take a look at the following resources:
+```js
+import { useStateContext } from "../context/contextProvider";
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+const Counter = () => {
+  const { currentCounter, setCurrentCounter } = useStateContext();
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+  return (
+    <div>
+      <h2>Increment and decrement</h2>
+      <h3>{currentCounter}</h3>
+      <div>
+        <button
+          onClick={() => {
+            setCurrentCounter(currentCounter + 1);
+          }}
+        >
+          +
+        </button>
+        <button
+          onClick={() => {
+            setCurrentCounter(currentCounter - 1);
+          }}
+        >
+          -
+        </button>
+      </div>
+    </div>
+  );
+};
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+export default Counter;
+```
